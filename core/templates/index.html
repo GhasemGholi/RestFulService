@@ -6,9 +6,14 @@
 </head>
 <body>
     <h1> URL Shortener Prototype <h1>
-    <form action="/" method="GET"> 
+    <form action="/" method="POST"> 
         <input type="text" name="URL_input" placeholder="Enter your URL to be shortened">
         <input type="submit">
     </form>
+
+    <h1>URLs</h1>
+    {% for url in Urls %}
+      <p>{{url.original}} : {{url.short}}</p>
+    {% endfor %}
 </body>
 </html>
