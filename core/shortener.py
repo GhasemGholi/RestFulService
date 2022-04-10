@@ -7,7 +7,7 @@ class Shortener:
         self.__shortenUrl(url)
     
     def __shortenUrl(self, url):
-        hashedUrl = hashlib.sha512(url.encode())
+        hashedUrl = hashlib.sha256(url.encode())
         hexifiedUrl = hashedUrl.hexdigest()
         self.shortenedUrl = hexifiedUrl[0:self.URL_LEN]
 
