@@ -15,9 +15,11 @@ def index():
     '''
     if request.method == 'POST':
         url = request.form['URL_input']
-        if is_url(url):
-            pass
-        db_entry = Urls(original=url, short=Shortener(url).shortenedUrl)
+        shortened = Shortener(url)
+        if not shortened.is_url(url):
+            print("Error")
+            exit()
+        db_entry = Urls(original=url, short=shortened.shortenedUrl)
         db.session.add(db_entry)
         db.session.commit()
         # TODO: add to database
@@ -30,16 +32,8 @@ def index():
         return bad_request('400: Bad Request')
     
 
-@app.route('/<name>', methods=['GET', 'PUT', 'DELETE'])
-def index_param(name):
-    
-
-def is_url(url):
-    '''
-    TODO: Return boolean containing the validity of the URL.
-    '''
-    return url
-
+# @app.route('/<name>', methods=['GET', 'PUT', 'DELETE'])
+# def index_param(name):
 
 def bad_request(msg):
     resp = jsonify({'message': msg})
