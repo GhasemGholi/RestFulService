@@ -23,13 +23,8 @@ def index():
         db.session.add(db_entry)
         db.session.commit()
         # TODO: add to database
-        return render_template('index.html')
 
-    elif request.method == 'GET':
-        return render_template('index.html')
-
-    else: 
-        return bad_request('400: Bad Request')
+    return render_template('index.html', urls=Urls.query.all())
     
 
 # @app.route('/<name>', methods=['GET', 'PUT', 'DELETE'])
