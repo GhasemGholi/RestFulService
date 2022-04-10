@@ -1,4 +1,4 @@
-from app import db
+from core import db
 
 class Urls(db.Model):
     id = db.Column("id", db.Integer, primary_key=True)

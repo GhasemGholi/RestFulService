@@ -1,6 +1,6 @@
 from flask import *
-from app import app, db
-from app.models import Urls
+from core import app, db
+from core.models import Urls
 
 app = Flask(__name__)
 app.config['SQL_ALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -15,7 +15,7 @@ def init_tables():
     db.create_all()
 
 
-@app.route('/', methods=['POST', 'GET'])
+@app.get('/')
 def index():
     '''
     Set up the route to the index page. 
