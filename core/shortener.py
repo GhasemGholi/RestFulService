@@ -1,8 +1,8 @@
 import hashlib
 
 class Shortener:
-    URL_LEN = 5
-    shortenedUrl = ""
+    __URL_LEN = 5
+    __shortenedUrl = ""
     def __init__(self, url):
         self.__shortenUrl(url)
     
