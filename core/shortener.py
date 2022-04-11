@@ -1,10 +1,10 @@
 import hashlib
-import requests
+import re
 
 class Shortener:
     URL_LEN = 5
     shortenedUrl = ""
-    base_url = 'https://www.tinyurl/'
+    base_url = 'https://www.tiny/'
     
     def __init__(self, url):
         self.__shortenUrl(url)
@@ -12,19 +12,18 @@ class Shortener:
     def __shortenUrl(self, url):
         hashedUrl = hashlib.sha256(url.encode())
         hexifiedUrl = hashedUrl.hexdigest()
-        self.shortenedUrl = self.base_url + hexifiedUrl[0:self.URL_LEN]
+        self.shortenedUrl = self.base_url + hexifiedUrl[:self.URL_LEN]
 
     def _print(self):
-        print(self.shortenedUrl)
+            print(self.shortenedUrl)
 
-    def is_url(self, url):
-        try: 
-            requests.get(url)
-        except: 
-            return False
-        return True
-
-if __name__ == "__main__":
-    sh = Shortener("https://stackoverflow.com/questions/1641219/does-python-have-private-variables-in-classes").shortenedUrl
-    # sh._print()
-    print(sh)
+def is_url(url):
+    '''Code from: https://stackoverflow.com/questions/827557/how-do-you-validate-a-url-with-a-regular-expression-in-python'''
+    regex = re.compile(
+        r'^https?://'  # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+[A-Z]{2,6}\.?|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})' # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    return url is not None and regex.search(url)
