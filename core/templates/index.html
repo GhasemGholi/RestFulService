@@ -3,17 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <title> URL Shortener </title>
+
+    <script>
+        function sendDelete(event){
+            event.preventDefault();
+            xhttp.open("DELETE", this.href, true);
+            xhttp.send();
+        }
+    </script>
 </head>
 <body>
     <h1> URL Shortener Prototype <h1>
     <form action="/" method="POST"> 
-        <input type="text" name="URL_input" placeholder="Enter your URL to be shortened">
-        <input type="submit">
+        <input type="text" name="URL_input" placeholder="Type in your URL">
+        <input type="submit" value="Add URL">
     </form>
+
+    <form action="/" method="PUT"> 
+        <input type="text" name="URL_input" placeholder="Type in your URL">
+        <input type="submit" value="Modify URL">
+    </form>
+
+    <form action="/" method="DELETE"> 
+        <input type="text" name="URL_input" placeholder="Type in your URL">
+        <input type="submit" value='Remove URL'>
+    </form>
+
+    <button type="button" onclick="sendDelete(event)"> Clear All </button>
 
     <h1>URLs</h1>
     {% for url in urls %}
-      <p>{{url.original}} : {{url.short}}</p>
+      <p>{{url.id}} {{url.original}} : {{url.short}}</p>
     {% endfor %}
 </body>
 </html>

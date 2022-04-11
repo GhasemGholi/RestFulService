@@ -8,7 +8,7 @@ from core.shortener import Shortener
 def init_db():
     db.create_all()
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST', 'DELETE'])
 def index():
     '''
     Set up the route to the index page. 
@@ -17,18 +17,30 @@ def index():
         url = request.form['URL_input']
         shortened = Shortener(url)
         if not shortened.is_url(url):
-            print("Error")
-            exit()
+            flash('Please enter a valid URL.')
+            return redirect(url_for('index',  urls=Urls.query.all()))
+
         db_entry = Urls(original=url, short=shortened.shortenedUrl)
         db.session.add(db_entry)
         db.session.commit()
-        # TODO: add to database
+    elif request.method == 'DELETE':
+        Urls.__table__.drop()
 
     return render_template('index.html', urls=Urls.query.all())
     
 
-# @app.route('/<name>', methods=['GET', 'PUT', 'DELETE'])
-# def index_param(name):
+@app.route('/<id>', methods=['GET', 'PUT', 'DELETE'])
+def index_param(id):
+    link = Urls.query.filter_by(id=id).first()
+    if not link:
+        flash('Please enter a valid URL.')
+        return redirect(url_for('index',  urls=Urls.query.all()))
+    
+    if request.method == 'GET':
+        return redirect(link.original)
+    elif request.method == 'DELETE':
+        link.delete()
+        return render_template('index.html', urls=Urls.query.all())
 
 def bad_request(msg):
     resp = jsonify({'message': msg})
