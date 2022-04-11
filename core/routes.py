@@ -48,7 +48,7 @@ def delete_one(id):
     if entry:
         db.session.delete(entry)
         db.session.commit()
-        return make_response({'message': 'Deleted entry with id: {}'.format(id)}, 204)
+        return make_response(None, 204)
     else: 
         return make_response({'message': '404 Not Found'}, 404)
 
