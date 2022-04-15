@@ -1,3 +1,6 @@
+'''
+Initialize our database, application and its configurations.
+'''
 import os
 
 from flask import Flask
@@ -14,5 +17,5 @@ app.secret_key = "super secret key"
 
 db = SQLAlchemy(app)
 
-from core import routes
+from core import routes # Import after setting up db to prevent cyclic import.
 

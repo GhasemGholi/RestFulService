@@ -19,18 +19,6 @@
         <input type="submit" value="Add URL">
     </form>
 
-    <form action="/" method="PUT"> 
-        <input type="text" name="URL_input" placeholder="Type in your URL">
-        <input type="submit" value="Modify URL">
-    </form>
-
-    <form action="/" method="DELETE"> 
-        <input type="text" name="URL_input" placeholder="Type in your URL">
-        <input type="submit" value='Remove URL'>
-    </form>
-
-    <button type="button" onclick="sendDelete(event)"> Clear All </button>
-
     <h1>URLs</h1>
     {% for url in urls %}
       <p>{{url.id}} {{url.original}} : {{url.short}}</p>

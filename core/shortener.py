@@ -1,5 +1,8 @@
 import hashlib
 import re
+'''
+Functionality for the shortener service. 
+'''
 
 class Shortener:
     URL_LEN = 5
