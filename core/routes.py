@@ -26,7 +26,7 @@ def get_all():
     global isLoggedIn
     
     if not isLoggedIn:
-        return make_response({'message': 'YOU NEED TO LOGIN FIRST OR REGISTER'}, 400)
+        return make_response({'message': '403 forbidden, register first or login'}, 403)
     urls = Urls.query.all()
     return make_response([{"id": url.id, "original": url.original, "shortened": url.short} for url in urls], 200)
 
@@ -36,7 +36,7 @@ def add_url():
     global isLoggedIn
     
     if not isLoggedIn:
-        return make_response({'message': 'YOU NEED TO LOGIN FIRST OR REGISTER'}, 400)
+        return make_response({'message': '403 forbidden, register first or login'}, 403)
         
     url = request.values.get("url")
     if not is_url(url):
@@ -55,7 +55,7 @@ def delete_all():
     global isLoggedIn
     
     if not isLoggedIn:
-        return make_response({'message': 'YOU NEED TO LOGIN FIRST OR REGISTER'}, 400)
+        return make_response({'message': '403 forbidden, register first or login'}, 403)
     Urls.query.delete()
     return make_response({'message': '404 Not Found'}, 404)
     
@@ -65,7 +65,7 @@ def get_one(id):
     global isLoggedIn
     
     if not isLoggedIn:
-        return make_response({'message': 'YOU NEED TO LOGIN FIRST OR REGISTER'}, 400)
+        return make_response({'message': '403 forbidden, register first or login'}, 403)
     entry = Urls.query.filter_by(id=id).first()
     if entry:
         return make_response({'id': int(entry.id), 'url': entry.original, 'shortened': entry.short}, 302)
@@ -78,7 +78,7 @@ def delete_one(id):
     global isLoggedIn
     
     if not isLoggedIn:
-        return make_response({'message': 'YOU NEED TO LOGIN FIRST OR REGISTER'}, 400)
+        return make_response({'message': '403 forbidden, register first or login'}, 403)
     
     entry = Urls.query.filter_by(id=id).first()
     print(entry)
@@ -105,7 +105,7 @@ def update_one(id):
     global isLoggedIn
     
     if not isLoggedIn:
-        return make_response({'message': 'YOU NEED TO LOGIN FIRST OR REGISTER'}, 400)
+        return make_response({'message': '403 forbidden, register first or login'}, 403)
     
     entry = Urls.query.filter_by(id=id).first()
     if not entry:
@@ -126,14 +126,14 @@ def register():
     password = request.values.get("password")
     
     if not user or not password:
-        return make_response({'message': 'NO USERNAME AND PASSWORD PROVIDED'}, 400)
+        return make_response({'message': '400 error, no user name or password provided'}, 400)
     if Users.query.filter_by(user=user).first():
-        return make_response({'message': 'USERNAME ALREADY EXISTS'}, 400)
+        return make_response({'message': '403 forbidden, username already exists'}, 403)
 
     credentials = Users(user=user, password=password)
     db.session.add(credentials)
     db.session.commit()
-    return make_response({"username": credentials.user}, 201)
+    return make_response({"username": credentials.user}, 200)
 
 @app.route('/users/login', methods=['POST'])
 def login():
@@ -146,17 +146,17 @@ def login():
     if providedUser is not None:
         token = providedUser.checkToken()
     else:
-        return make_response({'message': 'REGISTER FIRST'}, 400)
+        return make_response({'message': '400 forbidden, register first'}, 403)
 
     if not token:
         if not user or not password:
-            return make_response({'message': 'NO USERNAME AND PASSWORD PROVIDED'}, 400)
+            return make_response({'message': '400 erro, no username or password provided'}, 400)
         
         if not providedUser or not providedUser.checkPassword(password):
-            return make_response({'message': 'WRONG USERNAME OR WRONG PASSWORD'}, 400)
+            return make_response({'message': '403 forbidden, wrong username or password'}, 403)
     
     isLoggedIn = True
-    return make_response("LOGGED IN", 201)
+    return make_response("LOGGED IN", 200)
 
 def make_response(data, status_code):
     '''
