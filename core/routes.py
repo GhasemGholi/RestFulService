@@ -10,18 +10,24 @@ from ast import Global
 from glob import glob
 from flask import Flask, redirect, url_for, jsonify, request, g
 from sqlalchemy import false
-from core import app, db
+from core import app_api, app_users, db_api, db_users
 from core.models import Urls, Users
 from core.shortener import Shortener, is_url
 
 isLoggedIn = False
 
-@app.before_first_request
+
+@app_api.before_first_request
 def init_db():
-    db.create_all()
+    db_api.create_all()
 
 
-@app.route('/', methods=['GET'])
+@app_users.before_first_request
+def init_db():
+    db_users.create_all()
+
+
+@app_api.route('/', methods=['GET'])
 def get_all():
     global isLoggedIn
     
@@ -31,7 +37,7 @@ def get_all():
     return make_response([{"id": url.id, "original": url.original, "shortened": url.short} for url in urls], 200)
 
 
-@app.route('/', methods=['POST'])
+@app_api.route('/', methods=['POST'])
 def add_url():
     global isLoggedIn
     
@@ -44,13 +50,13 @@ def add_url():
 
     short_url = Shortener(url).shortenedUrl
     db_entry = Urls(original=url, short=short_url)
-    db.session.add(db_entry)
-    db.session.commit()
+    db_api.session.add(db_entry)
+    db_api.session.commit()
 
     return make_response({'id': db_entry.id}, 201)
 
 
-@app.route('/', methods=['DELETE'])
+@app_api.route('/', methods=['DELETE'])
 def delete_all():
     global isLoggedIn
     
@@ -60,7 +66,7 @@ def delete_all():
     return make_response({'message': '404 Not Found'}, 404)
     
 
-@app.route('/<id>', methods=['GET'])
+@app_api.route('/<id>', methods=['GET'])
 def get_one(id):
     global isLoggedIn
     
@@ -73,7 +79,7 @@ def get_one(id):
         return make_response({'message': '404 Not Found'}, 404)
 
 
-@app.route('/<id>', methods=['DELETE'])
+@app_api.route('/<id>', methods=['DELETE'])
 def delete_one(id):
     global isLoggedIn
     
@@ -83,14 +89,14 @@ def delete_one(id):
     entry = Urls.query.filter_by(id=id).first()
     print(entry)
     if entry:
-        db.session.delete(entry)
-        db.session.commit()
+        db_api.session.delete(entry)
+        db_api.session.commit()
         return make_response(None, 204)
     else: 
         return make_response({'message': '404 Not Found'}, 404)
 
 
-@app.route('/<id>', methods=['PUT'])
+@app_api.route('/<id>', methods=['PUT'])
 def update_one(id):
     '''
     Handles a PUT request at endpoint /:id. Searches the id in the database 
@@ -120,7 +126,8 @@ def update_one(id):
     entry.short = short_url
     return make_response({'message': '200 Success'}, 200)
     
-@app.route('/users', methods=['POST'])
+
+@app_users.route('/users', methods=['POST'])
 def register():
     user = request.values.get("user")
     password = request.values.get("password")
@@ -131,11 +138,12 @@ def register():
         return make_response({'message': '403 forbidden, username already exists'}, 403)
 
     credentials = Users(user=user, password=password)
-    db.session.add(credentials)
-    db.session.commit()
+    db_users.session.add(credentials)
+    db_users.session.commit()
     return make_response({"username": credentials.user}, 200)
 
-@app.route('/users/login', methods=['POST'])
+
+@app_users.route('/users/login', methods=['POST'])
 def login():
     global isLoggedIn
     user = request.values.get("user")
@@ -157,6 +165,7 @@ def login():
     
     isLoggedIn = True
     return make_response("LOGGED IN", 200)
+
 
 def make_response(data, status_code):
     '''
