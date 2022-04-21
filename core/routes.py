@@ -10,37 +10,34 @@ from ast import Global
 from glob import glob
 from flask import Flask, redirect, url_for, jsonify, request, g
 from sqlalchemy import false
-from core import app_api, app_users, db_api, db_users
-from core.models import Urls, Users
+from core import app_api, db_api
+from core.models import Users
 from core.shortener import Shortener, is_url
+import sys
 
 isLoggedIn = False
-
+usersList = dict()
+currentUser = ""
 
 @app_api.before_first_request
 def init_db():
     db_api.create_all()
 
 
-@app_users.before_first_request
-def init_db():
-    db_users.create_all()
-
-
 @app_api.route('/', methods=['GET'])
 def get_all():
-    global isLoggedIn
-    
+
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
-    urls = Urls.query.all()
-    return make_response([{"id": url.id, "original": url.original, "shortened": url.short} for url in urls], 200)
+
+    urls = usersList[currentUser].Urls.query.filter(usersList[currentUser].Urls.user == currentUser)
+    response = [{"id": url.id, "original": url.original, "shortened": url.short, 'user':url.user} for url in urls]
+    
+    return make_response(response, 200)
 
 
 @app_api.route('/', methods=['POST'])
 def add_url():
-    global isLoggedIn
-    
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
         
@@ -49,7 +46,8 @@ def add_url():
         return make_response({'message': '400 Bad Request'}, 400)
 
     short_url = Shortener(url).shortenedUrl
-    db_entry = Urls(original=url, short=short_url)
+
+    db_entry = usersList[currentUser].Urls(original=url, short=short_url, user=currentUser)
     db_api.session.add(db_entry)
     db_api.session.commit()
 
@@ -58,37 +56,34 @@ def add_url():
 
 @app_api.route('/', methods=['DELETE'])
 def delete_all():
-    global isLoggedIn
-    
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
-    Urls.query.delete()
+    
+    usersList[currentUser].Urls.query.filter(usersList[currentUser].Urls.user == currentUser).delete()
+    
     return make_response({'message': '404 Not Found'}, 404)
     
 
 @app_api.route('/<id>', methods=['GET'])
 def get_one(id):
-    global isLoggedIn
-    
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
-    entry = Urls.query.filter_by(id=id).first()
-    if entry:
-        return make_response({'id': int(entry.id), 'url': entry.original, 'shortened': entry.short}, 302)
+    entry = usersList[currentUser].Urls.query.filter_by(id=id).first()
+
+    print(entry.user, file=sys.stdout)
+    if entry and entry.user == currentUser:
+        return make_response({'id': int(entry.id), 'url': entry.original, 'shortened': entry.short, 'user':entry.user}, 302)
     else:
         return make_response({'message': '404 Not Found'}, 404)
 
 
 @app_api.route('/<id>', methods=['DELETE'])
 def delete_one(id):
-    global isLoggedIn
-    
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
     
-    entry = Urls.query.filter_by(id=id).first()
-    print(entry)
-    if entry:
+    entry = usersList[currentUser].Urls.query.filter_by(id=id).first()
+    if entry and entry.user == currentUser:
         db_api.session.delete(entry)
         db_api.session.commit()
         return make_response(None, 204)
@@ -108,12 +103,10 @@ def update_one(id):
         resp <obj>: JSON response. 
     '''
     
-    global isLoggedIn
-    
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
     
-    entry = Urls.query.filter_by(id=id).first()
+    entry = usersList[currentUser].Urls.query.filter_by(id=id).first()
     if not entry:
         return make_response({'message': '404 Not Found'}, 404)
 
@@ -126,8 +119,7 @@ def update_one(id):
     entry.short = short_url
     return make_response({'message': '200 Success'}, 200)
     
-
-@app_users.route('/users', methods=['POST'])
+@app_api.route('/users', methods=['POST'])
 def register():
     user = request.values.get("user")
     password = request.values.get("password")
@@ -138,14 +130,16 @@ def register():
         return make_response({'message': '403 forbidden, username already exists'}, 403)
 
     credentials = Users(user=user, password=password)
-    db_users.session.add(credentials)
-    db_users.session.commit()
+    db_api.session.add(credentials)
+    db_api.session.commit()
+    usersList[credentials.user] = credentials
+    
     return make_response({"username": credentials.user}, 200)
 
-
-@app_users.route('/users/login', methods=['POST'])
+@app_api.route('/users/login', methods=['POST'])
 def login():
     global isLoggedIn
+    global currentUser
     user = request.values.get("user")
     password = request.values.get("password")
     token = ""
@@ -158,14 +152,19 @@ def login():
 
     if not token:
         if not user or not password:
-            return make_response({'message': '400 erro, no username or password provided'}, 400)
+            return make_response({'message': '400 error, no username or password provided'}, 400)
         
         if not providedUser or not providedUser.checkPassword(password):
             return make_response({'message': '403 forbidden, wrong username or password'}, 403)
     
+    currentUser = user
     isLoggedIn = True
     return make_response("LOGGED IN", 200)
 
+@app_api.route('/currentuser', methods=['GET'])
+def getCurrentUser():
+    global currentUser
+    return make_response(currentUser + " IS LOGGED IN", 200)
 
 def make_response(data, status_code):
     '''
