@@ -1,0 +1,15 @@
+version: '2'
+services:
+    login:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "5000:5000"
+        volumes:
+            - .:/code
+        depends_on:
+            - api
+    api:
+        image: python-restful
+
