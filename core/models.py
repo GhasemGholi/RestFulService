@@ -9,7 +9,7 @@ from core import db_api
 import jwt
 from flask import Flask, jsonify, g
 from core import app_api
-import secrets
+import hashlib
 
 class Users(db_api.Model):
     '''
@@ -35,18 +35,22 @@ class Users(db_api.Model):
 
     def __init__(self, user, password) -> None:
         self.user = user
-        self.password = password
+        self.password = self.hashPassword(password)
         self.key = self.tokenize()
-        # self.id = self.createID()
-    
+        # self.id = self.createID()    
+        
+    def hashPassword(self, password):
+        shaHashedPwd = hashlib.sha256(password.encode()).hexdigest()
+        return shaHashedPwd
+
     def checkToken(self):
         check = jwt.decode(self.key, "secret", algorithms=["HS256"])
         if check != {self.user : self.password}:
             return False
         return True
-    
+
     def checkPassword(self, password):
-        if self.password is password:
+        if self.password == self.hashPassword(password):
             return True
         return False
                   

@@ -150,12 +150,11 @@ def login():
     else:
         return make_response({'message': '400 forbidden, register first'}, 403)
 
-    if not token:
-        if not user or not password:
-            return make_response({'message': '400 error, no username or password provided'}, 400)
-        
-        if not providedUser or not providedUser.checkPassword(password):
-            return make_response({'message': '403 forbidden, wrong username or password'}, 403)
+    if not user or not password:
+        return make_response({'message': '400 error, no username or password provided'}, 400)
+    
+    if not providedUser or not providedUser.checkPassword(password):
+        return make_response({'message': '403 forbidden, wrong username or password'}, 403)
     
     currentUser = user
     isLoggedIn = True
