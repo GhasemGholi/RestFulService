@@ -8,7 +8,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 BASE_PATH = os.path.abspath(os.path.dirname(__file__))
 DATABASE = os.environ.get("DB_URI", f"sqlite:///{os.path.join(BASE_PATH, 'url.db')}")
-# DB_USERS = os.environ.get("DB_URI", f"sqlite:///{os.path.join(BASE_PATH, 'users.db')}")
 
 app_api = Flask(__name__)
 app_api.config['SQL_ALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -18,5 +17,4 @@ app_api.secret_key = "super secret key"
 
 db_api = SQLAlchemy(app_api)
 
-from core import routes # Import after setting up db to prevent cyclic import.
-
+from admin import users # Import after setting up db to prevent cyclic import.
