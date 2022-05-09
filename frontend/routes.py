@@ -66,7 +66,7 @@ def get_one(id):
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
     
-    entry = usersList[currentUser]
+    entry = usersList[currentUser].Urls.query.filter_by(id=id).first()
 
     if entry and entry.user == currentUser:
         return make_response({'id': int(entry.id), 'url': entry.original, 'shortened': entry.short, 'user':entry.user}, 302)
@@ -79,7 +79,7 @@ def delete_one(id):
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
     
-    entry = usersList[currentUser].query.filter_by(id=id).first()
+    entry = usersList[currentUser].Urls.query.filter_by(id=id).first()
     if entry and entry.user == currentUser:
         db_api.session.delete(entry)
         db_api.session.commit()
@@ -93,7 +93,7 @@ def update_one(id):
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
     
-    entry = usersList[currentUser].query.filter_by(id=id).first()
+    entry = usersList[currentUser].Urls.query.filter_by(id=id).first()
     if not entry:
         return make_response({'message': '404 Not Found'}, 404)
 
