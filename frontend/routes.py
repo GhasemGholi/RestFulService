@@ -1,10 +1,11 @@
 from calendar import c
 from glob import glob
+import json
 from sys import stdout
 from flask import jsonify, request
-from frontend import app_api, db_api
-from frontend.models import MessageBuilder
-from frontend.shortener import Shortener, is_url
+from main import app_api, db_api
+from models import MessageBuilder
+from shortener import Shortener, is_url
 import requests
 import re
 from sqlalchemy.inspection import inspect
@@ -14,10 +15,11 @@ isLoggedIn = False
 usersList = dict()
 currentUserId = 0
 
+
 @app_api.before_first_request
 def init_db():
     db_api.create_all()
-    checkLoggedIn()
+    # checkLoggedIn()
 
 
 @app_api.route('/', methods=['GET'])
@@ -48,6 +50,7 @@ def add_url():
 
     return make_response({'id': db_entry.id}, 201)
 
+
 @app_api.route('/', methods=['DELETE'])
 def delete_all():
     if not isLoggedIn:
@@ -63,7 +66,7 @@ def get_one(id):
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
     
-    entry = usersList[currentUser][id]
+    entry = usersList[currentUser]
 
     if entry and entry.user == currentUser:
         return make_response({'id': int(entry.id), 'url': entry.original, 'shortened': entry.short, 'user':entry.user}, 302)
@@ -105,11 +108,11 @@ def update_one(id):
 
 @app_api.route('/isLoggedIn', methods=['POST'])       
 def checkLoggedIn():
-    r = requests.get('http://127.0.0.1:5001/currentuser') 
+    r = requests.get("http://login:5001/currentuser", timeout=10)
 
     if r.status_code == 403:
         return make_response({'message': '403 Login first'}, 403)
-    
+
     global currentUser, isLoggedIn
     currentUser = re.sub('[^A-Za-z0-9]+', '', r.text)
     isLoggedIn = True

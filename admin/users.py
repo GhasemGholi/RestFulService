@@ -2,9 +2,12 @@ from ast import Global
 from glob import glob
 from flask import Flask, redirect, url_for, jsonify, request, g
 from sqlalchemy import false
-from admin import app_api, db_api
-from admin.models import Users
+from main import app_api, db_api
+from models import Users
+
 import requests
+from requests.adapters import HTTPAdapter
+# from requests.packages.urllib3.util.retry import Retry
 
 isLoggedIn = False
 usersList = dict()
@@ -14,10 +17,10 @@ currentUser = None
 def init_db():
     db_api.create_all()
 
-@app_api.route('/', methods=['GET'])
-def get_all():
-    # urls = Urls.query.all()
-    return make_response("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 200)
+# @app_api.route('/', methods=['GET'])
+# def get_all():
+#     # urls = Urls.query.all()
+#     return make_response("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 200)
 
 @app_api.route('/users', methods=['POST'])
 def register():
@@ -28,6 +31,8 @@ def register():
         return make_response({'message': '400 error, no user name or password provided'}, 400)
     if Users.query.filter_by(user=user).first():
         return make_response({'message': '403 forbidden, username already exists'}, 403)
+    if len(password) < 8:
+        return make_response({'message': '422 invalid, Please use a password with at least 8 characters'}, 422)
 
     credentials = Users(user=user, password=password)
     db_api.session.add(credentials)
@@ -59,7 +64,7 @@ def login():
     currentUser = user
     isLoggedIn = True
     
-    r = requests.get('http://127.0.0.1:5000/newlogin/'+user) 
+    requests.get('http://shortener:5000/newlogin/' + str(user))
     
     return make_response("LOGGED IN", 200)
 

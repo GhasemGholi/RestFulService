@@ -5,10 +5,9 @@ our CRUD operations.
 
 from lib2to3.pgen2 import token
 from sqlalchemy import true
-from admin import db_api
+from main import db_api, app_api
 import jwt
 from flask import Flask, jsonify, g
-from admin import app_api
 import hashlib
 
 class Users(db_api.Model):
@@ -17,7 +16,7 @@ class Users(db_api.Model):
           Should contain id, username and hashed password at least. 
     '''
     id = db_api.Column("id", db_api.Integer(), primary_key=True)
-    key = db_api.Column("key", db_api.LargeBinary())
+    key = db_api.Column("key", db_api.String())
     user = db_api.Column("user", db_api.String())
     password = db_api.Column("password", db_api.String())
     token = ""
