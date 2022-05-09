@@ -2,24 +2,24 @@ from ast import Global
 from glob import glob
 from flask import Flask, redirect, url_for, jsonify, request, g
 from sqlalchemy import false
-from admin import app_api, db_api
-from admin.models import Users
+from src import app, db_api
+from src.models import Users
 import requests
 
 isLoggedIn = False
 usersList = dict()
 currentUser = None
 
-@app_api.before_first_request
+@app.before_first_request
 def init_db():
     db_api.create_all()
 
-@app_api.route('/', methods=['GET'])
+@app.route('/', methods=['GET'])
 def get_all():
     # urls = Urls.query.all()
     return make_response("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 200)
 
-@app_api.route('/users', methods=['POST'])
+@app.route('/users', methods=['POST'])
 def register():
     user = request.values.get("user")
     password = request.values.get("password")
@@ -36,7 +36,7 @@ def register():
     
     return make_response({"username": credentials.user}, 200)
 
-@app_api.route('/users/login', methods=['POST'])
+@app.route('/users/login', methods=['POST'])
 def login():
     global isLoggedIn
     global currentUser
@@ -64,7 +64,7 @@ def login():
     return make_response("LOGGED IN", 200)
 
 
-@app_api.route('/currentuser', methods=['GET'])
+@app.route('/currentuser', methods=['GET'])
 def getCurrentUser():
     global currentUser
     if currentUser == None:

@@ -5,10 +5,10 @@ our CRUD operations.
 
 from lib2to3.pgen2 import token
 from sqlalchemy import true
-from admin import db_api
+from src import db_api
 import jwt
 from flask import Flask, jsonify, g
-from admin import app_api
+from src import app
 import hashlib
 
 class Users(db_api.Model):
@@ -25,8 +25,7 @@ class Users(db_api.Model):
     def __init__(self, user, password) -> None:
         self.user = user
         self.password = self.hashPassword(password)
-        self.key = self.tokenize()
-        # self.id = self.createID()    
+        self.key = self.tokenize()  
         
     def hashPassword(self, password):
         shaHashedPwd = hashlib.sha256(password.encode()).hexdigest()
@@ -49,9 +48,6 @@ class Users(db_api.Model):
     
     def getUser(self):
         return self.user
-    
-    # def createID(self):
-    #     return secrets.token_bytes(nbytes=8)
     
     def getID(self):
         return self.id

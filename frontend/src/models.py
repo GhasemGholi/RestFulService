@@ -1,4 +1,4 @@
-from frontend import db_api
+from src import db_api
 
 class MessageBuilder:
     class Urls(db_api.Model):

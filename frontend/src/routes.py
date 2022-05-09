@@ -2,9 +2,9 @@ from calendar import c
 from glob import glob
 from sys import stdout
 from flask import jsonify, request
-from frontend import app_api, db_api
-from frontend.models import MessageBuilder
-from frontend.shortener import Shortener, is_url
+from src import app, db_api
+from src.models import MessageBuilder
+from src.shortener import Shortener, is_url
 import requests
 import re
 from sqlalchemy.inspection import inspect
@@ -14,13 +14,13 @@ isLoggedIn = False
 usersList = dict()
 currentUserId = 0
 
-@app_api.before_first_request
+@app.before_first_request
 def init_db():
     db_api.create_all()
     checkLoggedIn()
 
 
-@app_api.route('/', methods=['GET'])
+@app.route('/', methods=['GET'])
 def get_all():
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
@@ -32,7 +32,7 @@ def get_all():
     return make_response(response, 200)
 
 
-@app_api.route('/', methods=['POST'])
+@app.route('/', methods=['POST'])
 def add_url():
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
@@ -48,7 +48,7 @@ def add_url():
 
     return make_response({'id': db_entry.id}, 201)
 
-@app_api.route('/', methods=['DELETE'])
+@app.route('/', methods=['DELETE'])
 def delete_all():
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
@@ -58,7 +58,7 @@ def delete_all():
     return make_response({'message': '404 Not Found'}, 404)
     
 
-@app_api.route('/<id>', methods=['GET'])
+@app.route('/<id>', methods=['GET'])
 def get_one(id):
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
@@ -71,7 +71,7 @@ def get_one(id):
         return make_response({'message': '404 Not Found'}, 404)
 
 
-@app_api.route('/<id>', methods=['DELETE'])
+@app.route('/<id>', methods=['DELETE'])
 def delete_one(id):
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
@@ -85,7 +85,7 @@ def delete_one(id):
         return make_response({'message': '404 Not Found'}, 404)
 
 
-@app_api.route('/<id>', methods=['PUT'])
+@app.route('/<id>', methods=['PUT'])
 def update_one(id):
     if not isLoggedIn:
         return make_response({'message': '403 forbidden, register first or login'}, 403)
@@ -103,7 +103,7 @@ def update_one(id):
     entry.short = short_url
     return make_response({'message': '200 Success'}, 200)
 
-@app_api.route('/isLoggedIn', methods=['POST'])       
+@app.route('/isLoggedIn', methods=['POST'])       
 def checkLoggedIn():
     r = requests.get('http://127.0.0.1:5001/currentuser') 
 
@@ -116,7 +116,7 @@ def checkLoggedIn():
     
     usersList[currentUser] = MessageBuilder()
     
-@app_api.route('/newlogin/<login>', methods=['GET'])       
+@app.route('/newlogin/<login>', methods=['GET'])       
 def newLogInDetected(login):    
     global currentUser, isLoggedIn
     currentUser = login
@@ -126,7 +126,7 @@ def newLogInDetected(login):
     
     return make_response(login + ' is logged in', 200)
 
-@app_api.route('/currentuser', methods=['GET'])
+@app.route('/currentuser', methods=['GET'])
 def getCurrentUser():
     global currentUser
     if currentUser == None:
