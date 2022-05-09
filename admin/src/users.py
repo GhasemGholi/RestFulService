@@ -24,6 +24,8 @@ def register():
     user = request.values.get("user")
     password = request.values.get("password")
     
+    if len(password) < 8:
+        return make_response({'message': '400 error, password too short'}, 400)
     if not user or not password:
         return make_response({'message': '400 error, no user name or password provided'}, 400)
     if Users.query.filter_by(user=user).first():
