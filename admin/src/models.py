@@ -17,7 +17,7 @@ class Users(db_api.Model):
           Should contain id, username and hashed password at least. 
     '''
     id = db_api.Column("id", db_api.Integer(), primary_key=True)
-    key = db_api.Column("key", db_api.LargeBinary())
+    key = db_api.Column("key", db_api.String())
     user = db_api.Column("user", db_api.String())
     password = db_api.Column("password", db_api.String())
     token = ""
@@ -28,7 +28,7 @@ class Users(db_api.Model):
         self.key = self.tokenize()  
         
     def hashPassword(self, password):
-        shaHashedPwd = hashlib.sha256(password.encode()).hexdigest()
+        shaHashedPwd = hashlib.sha256(password.encode()).hexdigest()[:8]
         return shaHashedPwd
 
     def checkToken(self):

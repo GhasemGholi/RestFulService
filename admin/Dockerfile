@@ -1,4 +1,4 @@
-FROM python:3.6.13-slim
+FROM python:3.10.4
 WORKDIR /app
 COPY . .
 RUN apt update -y && apt-get install -y python3-dev build-essential && \

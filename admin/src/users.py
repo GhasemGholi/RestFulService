@@ -17,13 +17,13 @@ def init_db():
 @app.route('/', methods=['GET'])
 def get_all():
     # urls = Urls.query.all()
-    return make_response("YOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO", 200)
+    return make_response("TEST TEST", 200)
 
 @app.route('/users', methods=['POST'])
 def register():
     user = request.values.get("user")
     password = request.values.get("password")
-    
+
     if len(password) < 8:
         return make_response({'message': '400 error, password too short'}, 400)
     if not user or not password:
